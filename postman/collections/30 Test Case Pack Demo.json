@@ -1,0 +1,1810 @@
+{
+	"info": {
+		"_postman_id": "d7f5ca62-f239-47d3-b5e2-d46497700d76",
+		"name": "30 Test Case Pack Demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "27240747-d7f5ca62-f239-47d3-b5e2-d46497700d76"
+	},
+	"item": [
+		{
+			"name": "SPAPI - Logon",
+			"item": [
+				{
+					"name": "SPAPI - Logon",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f9274446-a21f-41d8-a1da-f346b920bb7e",
+								"exec": [
+									"// converting the response to json - retrieving the session key - mapping the session key value to a 'sessionkey' variable\r",
+									"var responseJson = JSON.parse(responseBody);\r",
+									"console.log(responseJson);\r",
+									"const elementValue = responseJson['SessionKey'];\r",
+									"pm.environment.set('sessionKey', elementValue);\r",
+									"\r",
+									"\r",
+									"// ----- PASS/FAIL TESTS -----\r",
+									"\r",
+									"// check for status code 200\r",
+									"pm.test(\"Status code 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"// retrieving the logon status from the response\r",
+									"const status = responseJson['LogonStatus'];\r",
+									"\r",
+									"// check if user successfully logged in to the SP Interface\r",
+									"pm.test(\"Successfully logged in\", () => {\r",
+									"    pm.expect(status).to.eql(\"Successfully Logged In To SP Interface\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "685eeac1-a554-4d03-9ee0-ce5075fdaf15",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"Username\": \"{{spapi-username}}\",\n\"Password\": \"{{spapi-password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/spinterface/performlogon",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"spinterface",
+								"performlogon"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "bca30520-7857-4523-bd06-d606d72e9ad0"
+		},
+		{
+			"name": "DB - Clear Subscriber",
+			"item": [
+				{
+					"name": "DB - Clear Subscriber",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6db94aac-6f2d-498f-a91a-4143dfa73196",
+								"exec": [
+									"var error = pm.environment.get(\"error\");",
+									"",
+									"var responseJson = JSON.parse(responseBody);",
+									"",
+									"if (error){",
+									"    console.log(\"Error: Invalid SubId. Expected ICCID as the value\");",
+									"}",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const result = responseJson['Result'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successful request\", () => {",
+									"    pm.expect(result).to.eql(\"Request successful\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "cd6cd6b5-1070-47b0-bf15-45228dd9999e",
+								"exec": [
+									"console.log(\"Clear Test  Data for Sub1\")",
+									"",
+									"var requestJson = JSON.parse(pm.request.body);",
+									"var subId = requestJson['SqlStatement'].slice(33, -2);",
+									"",
+									"if (subId.length !== 20 || isNaN(subId)){",
+									"    pm.environment.set(\"error\", true);",
+									"    pm.request.body = null",
+									"}",
+									"else {",
+									"    pm.environment.set(\"error\", false);",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "76fec591-1dde-4d7e-addd-954e39ad90c9",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"SqlStatement\": \"Call SA_TST.P_DELETE_SUBSCRIBER('89440000000003041136')\",\n   \"Operation\": \"STORED-PROC\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/db/executeoperation",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"db",
+								"executeoperation"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "88dc70e2-e0cf-407f-9d81-e6541fb84c83"
+		},
+		{
+			"name": "DB - Clear Msisdn",
+			"item": [
+				{
+					"name": "DB - Clear Msisdn",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "92dd9932-2d56-47b0-9d56-95ed27c345d9",
+								"exec": [
+									"const responseJson = JSON.parse(responseBody);",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const result = responseJson['Result'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successful request\", () => {",
+									"    pm.expect(result).to.eql(\"Request successful\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "309e6d9b-958c-4a20-81a3-c0948ff6a718",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"SqlStatement\": \"Call SA_TST.P_TST_SETUP_MSISDN('270824400013080','','','','','')\",\n   \"Operation\": \"STORED-PROC\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/db/executeoperation",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"db",
+								"executeoperation"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "10f9e1b4-e185-4f34-8a65-58cf24342c76"
+		},
+		{
+			"name": "DB - Clear Subscriber",
+			"item": [
+				{
+					"name": "DB - Clear Subscriber",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "94575f7b-661b-499d-8734-a7a84987f821",
+								"exec": [
+									"var error = pm.environment.get(\"error\");",
+									"",
+									"var responseJson = JSON.parse(responseBody);",
+									"",
+									"if (error){",
+									"    console.log(\"Error: Invalid SubId. Expected ICCID as the value\");",
+									"}",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const result = responseJson['Result'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successful request\", () => {",
+									"    pm.expect(result).to.eql(\"Request successful\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "6e9ba8fc-fd41-4c67-bbe2-2b92d872c45d",
+								"exec": [
+									"console.log(\"Clear Test  Data for Sub2\")",
+									"",
+									"var requestJson = JSON.parse(pm.request.body);",
+									"var subId = requestJson['SqlStatement'].slice(33, -2);",
+									"",
+									"if (subId.length !== 20 || isNaN(subId)){",
+									"    pm.environment.set(\"error\", true);",
+									"    pm.request.body = null",
+									"}",
+									"else {",
+									"    pm.environment.set(\"error\", false);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "d1a6c2ef-9745-40e6-abf7-799197c5e469",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"SqlStatement\": \"Call SA_TST.P_DELETE_SUBSCRIBER('89440000000002852806')\",\n   \"Operation\": \"STORED-PROC\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/db/executeoperation",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"db",
+								"executeoperation"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "a51a2f9d-79a3-4fea-923c-8333f7e7086e"
+		},
+		{
+			"name": "DB - Clear Msisdn",
+			"item": [
+				{
+					"name": "DB - Clear Msisdn",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8360dda9-d5b8-4946-8e29-20fa7d14a651",
+								"exec": [
+									"const responseJson = JSON.parse(responseBody);",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const result = responseJson['Result'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successful request\", () => {",
+									"    pm.expect(result).to.eql(\"Request successful\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "ca7d2102-f45a-49c7-bd24-f23dfc093a35",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"SqlStatement\": \"Call SA_TST.P_TST_SETUP_MSISDN('270825700077755','','','','','')\",\n   \"Operation\": \"STORED-PROC\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/db/executeoperation",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"db",
+								"executeoperation"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "c0630437-7045-4717-b3b8-f3706e98886d"
+		},
+		{
+			"name": "SPAPI - Create Subscriber",
+			"item": [
+				{
+					"name": "SPAPI - Create Subscriber",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "487519e3-e887-464e-9d5d-d80c8e5aeb1f",
+								"exec": [
+									"// converting response to json",
+									"const responseJson = JSON.parse(responseBody);",
+									"",
+									"// searching response array for request_result key-pair value... storing the value",
+									"let req_result;",
+									"",
+									"for (const attribute of responseJson) {",
+									"    if (attribute.resultName === 'REQUEST_RESULT') {",
+									"        req_result = attribute.resultValue;",
+									"        break;",
+									"    }",
+									"}",
+									"",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const result = responseJson['Result'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successfully logged\", () => {",
+									"    pm.expect(req_result).to.eql(\"Logged\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "8ede840d-d7e5-4f4a-b057-3dd45d397435",
+								"exec": [
+									"console.log(\"Setup offer-SPAPI\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "f3564414-f753-459f-8242-242965781315",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"securityKey\": \"{{sessionKey}}\",\n   \"functionSelector\": \"CRESUB\",\n   \"inParameterList\": [\n      {\n         \"attributeName\": \"SUB ID\",\n         \"attributeValue\": \"89440000000002852806\"\n      },\n      {\n         \"attributeName\": \"SUB ID TYPE\",\n         \"attributeValue\": \"C\"\n      },\n      {\n         \"attributeName\": \"ACCOUNT_NO\",\n         \"attributeValue\": \"11398\"\n      },\n      {\n         \"attributeName\": \"SP_CODE\",\n         \"attributeValue\": \"SP550\"\n      },\n      {\n         \"attributeName\": \"CUST_INFO_YN\",\n         \"attributeValue\": \"N\"\n      },\n      {\n         \"attributeName\": \"CUSTOMER_ID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"SP ID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"IMEI\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"COMPANY NAME\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"LAST4_ICCID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"AGENT_ID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"DEALER_ID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"COMPANY REGISTRATION NAME\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"COMMISSION POINT\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"C3D_C2C\",\n         \"attributeValue\": \"\"\n      }\n   ],\n   \"serviceActionList\": [\n      {\n         \"actionType\": \"\",\n         \"currentSoId\": \"\",\n         \"newSoId\": \"\",\n         \"sid1\": \"\",\n         \"sid1Type\": \"\",\n         \"sid2\": \"\",\n         \"sid2Type\": \"\",\n         \"sid3\": \"\",\n         \"sid3Type\": \"\",\n         \"sid4\": \"\",\n         \"sid4Type\": \"\"\n      }\n   ],\n   \"partyDetails\": {\n      \"activeYN\": \"\",\n      \"birthDate\": \"\",\n      \"contactList\": [\n         {\n            \"_region\": \"\",\n            \"address1\": \"\",\n            \"address2\": \"\",\n            \"address3\": \"\",\n            \"addressInd\": \"\",\n            \"countryId\": \"\",\n            \"externalPostalCode\": \"\",\n            \"fromDate\": \"\",\n            \"postalCode\": \"\",\n            \"seq\": 0,\n            \"suburb\": \"\",\n            \"toDate\": \"\",\n            \"town\": \"\"\n         }\n      ],\n      \"contactNumList\": [\n         {\n            \"areaNetCode\": \"\",\n            \"contactType\": \"\",\n            \"countryCode\": \"\",\n            \"dialNum\": \"\",\n            \"fromDate\": \"\",\n            \"seq\": 0,\n            \"toDate\": \"\"\n         }\n      ],\n      \"firstName\": \"\",\n      \"gender\": \"\",\n      \"icapId\": \"\",\n      \"icapRole\": \"\",\n      \"idList\": [\n         {\n            \"countryId\": \"\",\n            \"fromDate\": \"\",\n            \"id\": \"\",\n            \"idType\": \"\",\n            \"seq\": 0,\n            \"toDate\": \"\"\n         }\n      ],\n      \"initials\": \"\",\n      \"langCode\": \"\",\n      \"listedYN\": \"\",\n      \"roleList\": [\n         {\n            \"fromDate\": \"\",\n            \"roleType\": \"\",\n            \"seq\": 0,\n            \"suSeq\": \"\",\n            \"toDate\": \"\"\n         }\n      ],\n      \"seq\": \"\",\n      \"surname\": \"\",\n      \"titleId\": \"\"\n   },\n   \"actionAttributeList\": [\n      {\n         \"curent_sac_id\": \"\",\n         \"date_from\": \"\",\n         \"date_to\": \"\",\n         \"new_sac_id\": \"\",\n         \"sat_id\": \"\"\n      }\n   ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/spinterface/dofunctionex",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"spinterface",
+								"dofunctionex"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "5b493c76-9d58-4047-a2c6-2e31f8e86435"
+		},
+		{
+			"name": "SPAPI - Create Subscriber - Legal Requirement",
+			"item": [
+				{
+					"name": "SPAPI - Create Subscriber - Legal Requirement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "39118331-1852-4442-a597-8c7a2a4e7c77",
+								"exec": [
+									"// converting response to json",
+									"const responseJson = JSON.parse(responseBody);",
+									"",
+									"// searching response array for request_result key-pair value... storing the value",
+									"let req_result;",
+									"",
+									"for (const attribute of responseJson) {",
+									"    if (attribute.resultName === 'REQUEST_RESULT') {",
+									"        req_result = attribute.resultValue;",
+									"        break;",
+									"    }",
+									"}",
+									"",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const result = responseJson['Result'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successfully logged\", () => {",
+									"    pm.expect(req_result).to.eql(\"Logged\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "89645afb-73a5-4b4e-bb0d-64d8f71d9280",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"securityKey\": \"{{sessionKey}}\",\n   \"functionSelector\": \"CRERGL\",\n   \"inParameterList\": [\n      {\n         \"attributeName\": \"SUB ID\",\n         \"attributeValue\": \"89440000000002852806\"\n      },\n      {\n         \"attributeName\": \"SUB ID TYPE\",\n         \"attributeValue\": \"C\"\n      },\n      {\n         \"attributeName\": \"LAST4_ICCID\",\n         \"attributeValue\": \"2806\"\n      },\n      {\n         \"attributeName\": \"AGENT_ID\",\n         \"attributeValue\": \"ICAP\\\\VSP007KILL\"\n      },\n      {\n         \"attributeName\": \"DEALER_ID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"SENDING_MSISDN\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"SP_ID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"IMEI\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"PASSPORT_EXPIRY_DATE\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"SEOID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"ALT_CONTACT_NUMBER\",\n         \"attributeValue\": \"0214171800\"\n      },\n      {\n         \"attributeName\": \"SA_ID_VALIDATION\",\n         \"attributeValue\": \"N\"\n      }\n   ],\n   \"serviceActionList\": [\n      {\n         \"actionType\": \"\",\n         \"currentSoId\": \"\",\n         \"newSoId\": \"\",\n         \"sid1\": \"\",\n         \"sid1Type\": \"\",\n         \"sid2\": \"\",\n         \"sid2Type\": \"\",\n         \"sid3\": \"\",\n         \"sid3Type\": \"\",\n         \"sid4\": \"\",\n         \"sid4Type\": \"\"\n      }\n   ],\n   \"partyDetails\": {\n      \"activeYN\": \"Y\",\n      \"birthDate\": \"1972-10-17\",\n      \"contactList\": [\n         {\n            \"_region\": \"Western Cape\",\n            \"address1\": \"Street1\",\n            \"address2\": \"Street2\",\n            \"address3\": \"Street2\",\n            \"addressInd\": \"S\",\n            \"countryId\": \"ZA\",\n            \"externalPostalCode\": \"\",\n            \"fromDate\": \"2005-07-08\",\n            \"postalCode\": \"8000\",\n            \"seq\": 0,\n            \"suburb\": \"Foreshore\",\n            \"toDate\": \"\",\n            \"town\": \"Cape Town\"\n         },\n         {\n            \"_region\": \"Western Cape\",\n            \"address1\": \"adr1\",\n            \"address2\": \"adr2\",\n            \"address3\": \"adr3\",\n            \"addressInd\": \"D\",\n            \"countryId\": \"ZA\",\n            \"externalPostalCode\": \"\",\n            \"fromDate\": \"2005-07-08\",\n            \"postalCode\": \"8001\",\n            \"seq\": 0,\n            \"suburb\": \"Foreshore\",\n            \"toDate\": \"\",\n            \"town\": \"Somerset-West\"\n         }\n      ],\n      \"contactNumList\": [\n         {\n            \"areaNetCode\": \"21\",\n            \"contactType\": \"H\",\n            \"countryCode\": \"27\",\n            \"dialNum\": \"4171800\",\n            \"fromDate\": \"\",\n            \"seq\": 0,\n            \"toDate\": \"\"\n         }\n      ],\n      \"firstName\": \"Testing\",\n      \"gender\": \"M\",\n      \"icapId\": 0.0,\n      \"icapRole\": \"\",\n      \"idList\": [\n         {\n            \"countryId\": \"ZA\",\n            \"fromDate\": \"\",\n            \"id\": \"7210175084084\",\n            \"idType\": \"N\",\n            \"seq\": 0,\n            \"toDate\": \"\"\n         }\n      ],\n      \"initials\": \"A\",\n      \"langCode\": \"ENG\",\n      \"listedY\": \"Y\",\n      \"roleList\": [\n         {\n            \"fromDate\": \"\",\n            \"roleType\": \"L\",\n            \"seq\": 0,\n            \"suSeq\": \"\",\n            \"toDate\": \"\"\n         }\n      ],\n      \"seq\": 0,\n      \"surname\": \"Auto\",\n      \"titleId\": \"Mr\"\n   },\n   \"actionAttributeList\": [\n      {\n         \"curent_sac_id\": \"\",\n         \"date_from\": \"\",\n         \"date_to\": \"\",\n         \"new_sac_id\": \"\",\n         \"sat_id\": \"\"\n      }\n   ],\n   \"bankDetailsList\": [\n      {\n         \"accountName\": \"\",\n         \"accountNumber\": \"\",\n         \"accountType\": \"\",\n         \"accountUsage\": \"\",\n         \"actionType\": \"\",\n         \"bankName\": \"\",\n         \"branchCode\": \"\",\n         \"branchName\": \"\",\n         \"creditCardCode\": \"\",\n         \"creditCardCVCNumber\": \"\",\n         \"creditCardDetail\": \"\",\n         \"creditCardExpiryDate\": \"\",\n         \"creditCardName\": \"\",\n         \"creditCarddNumber\": \"\",\n         \"creditCardType\": \"\",\n         \"debitOrderCode\": \"\",\n         \"debitOrderConfirmationDate\": \"\",\n         \"debitOrderMandateDate\": \"\",\n         \"debitOrderStartDate\": \"\",\n         \"documentsReceived\": \"\"\n      }\n   ],\n   \"callLimitList\": [\n      {\n         \"action\": \"\",\n         \"actionType\": \"\",\n         \"activationDate\": \"\",\n         \"endDate\": \"\",\n         \"limitDate\": \"\",\n         \"notificationMethod\": \"\",\n         \"notificationNumber\": \"\",\n         \"startDate\": \"\",\n         \"threshold1\": 0.0,\n         \"threshold2\": 0.0,\n         \"threshold3\": 0.0,\n         \"threshold4\": 0.0,\n         \"value\": 0.0\n      }\n   ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/spinterface/dofunctionex2",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"spinterface",
+								"dofunctionex2"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "8c6ffeff-be9d-4c92-bc41-a786601c8fe4"
+		},
+		{
+			"name": "SPAPI - Activate Offer",
+			"item": [
+				{
+					"name": "SPAPI - Activate Offer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "749d47bf-5dec-400f-b622-240e20247e12",
+								"exec": [
+									"// converting response to json",
+									"const responseJson = JSON.parse(responseBody);",
+									"",
+									"// searching response array for request_result key-pair value... storing the value",
+									"let req_result;",
+									"",
+									"for (const attribute of responseJson) {",
+									"    if (attribute.resultName === 'REQUEST_RESULT') {",
+									"        req_result = attribute.resultValue;",
+									"        break;",
+									"    }",
+									"}",
+									"",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const result = responseJson['Result'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successfully logged\", () => {",
+									"    pm.expect(req_result).to.eql(\"Logged\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "f013af57-e246-4cb3-b659-50b183468820",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"securityKey\": \"{{sessionKey}}\",\n   \"functionSelector\": \"ACTOFF\",\n   \"inParameterList\": [\n      {\n         \"attributeName\": \"SUB ID\",\n         \"attributeValue\": \"89440000000002852806\"\n      },\n      {\n         \"attributeName\": \"SUB ID TYPE\",\n         \"attributeValue\": \"ICCID\"\n      },\n      {\n         \"attributeName\": \"OFFER_ID\",\n         \"attributeValue\": \"WTP\"\n      },\n      {\n         \"attributeName\": \"CLASS\",\n         \"attributeValue\": \"NAT\"\n      },\n      {\n         \"attributeName\": \"ICCID/SMARTCARD\",\n         \"attributeValue\": \"89440000000002852806\"\n      },\n      {\n         \"attributeName\": \"HLR_NUM_TYPE\",\n         \"attributeValue\": \"S\"\n      },\n      {\n         \"attributeName\": \"TYPE\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"PORTING ID\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"ALTERNATE_MSISDN\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"COMMISSION POINT\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"PROCESS DATE\",\n         \"attributeValue\": \"\"\n      },\n      {\n         \"attributeName\": \"EXTERNAL TRANSACTION ID\",\n         \"attributeValue\": \"6e3ee7c8-df56-416c-9b96-60b2300626b1\"\n      }\n   ],\n   \"serviceActionList\": [\n      {\n         \"actionType\": \"CRE\",\n         \"currentSoId\": \"\",\n         \"newSoId\": \"WTP\",\n         \"sid1\": \"270825700077755\",\n         \"sid1Type\": \"M\",\n         \"sid2\": \"\",\n         \"sid2Type\": \"\",\n         \"sid3\": \"\",\n         \"sid3Type\": \"\",\n         \"sid4\": \"\",\n         \"sid4Type\": \"\"\n      },\n      {\n         \"actionType\": \"CRE\",\n         \"currentSoId\": \"\",\n         \"newSoId\": \"STP\",\n         \"sid1\": \"270825700077755\",\n         \"sid1Type\": \"M\",\n         \"sid2\": \"\",\n         \"sid2Type\": \"\",\n         \"sid3\": \"\",\n         \"sid3Type\": \"\",\n         \"sid4\": \"\",\n         \"sid4Type\": \"\"\n      }\n   ],\n   \"partyDetails\": {\n      \"activeYN\": \"\",\n      \"birthDate\": \"\",\n      \"contactList\": [\n         {\n            \"_region\": \"\",\n            \"address1\": \"\",\n            \"address2\": \"\",\n            \"address3\": \"\",\n            \"addressInd\": \"\",\n            \"countryId\": \"\",\n            \"externalPostalCode\": \"\",\n            \"fromDate\": \"\",\n            \"postalCode\": \"\",\n            \"seq\": 0,\n            \"suburb\": \"\",\n            \"toDate\": \"\",\n            \"town\": \"\"\n         }\n      ],\n      \"contactNumList\": [\n         {\n            \"areaNetCode\": \"\",\n            \"contactType\": \"\",\n            \"countryCode\": \"\",\n            \"dialNum\": \"\",\n            \"fromDate\": \"\",\n            \"seq\": 0,\n            \"toDate\": \"\"\n         }\n      ],\n      \"firstName\": \"\",\n      \"gender\": \"\",\n      \"icapId\": 0,\n      \"icapRole\": \"\",\n      \"idList\": [\n         {\n            \"countryId\": \"\",\n            \"fromDate\": \"\",\n            \"id\": \"\",\n            \"idType\": \"\",\n            \"seq\": 0,\n            \"toDate\": \"\"\n         }\n      ],\n      \"initials\": \"\",\n      \"langCode\": \"\",\n      \"listedY\": \"\",\n      \"roleList\": [\n         {\n            \"fromDate\": \"\",\n            \"roleType\": \"\",\n            \"seq\": 0,\n            \"suSeq\": \"\",\n            \"toDate\": \"\"\n         }\n      ],\n      \"seq\": 0,\n      \"surname\": \"\",\n      \"titleId\": \"\"\n   }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/spinterface/dofunction",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"spinterface",
+								"dofunction"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "46a637ee-1849-474c-89f8-54e7dcd492a7"
+		},
+		{
+			"name": "SPAPI - Contract to Prepaid",
+			"item": [
+				{
+					"name": "SPAPI - Contract to Prepaid",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cd6c7cc2-7c93-4d0c-9c46-31981eb21b38",
+								"exec": [
+									"// converting response to json",
+									"const responseJson = JSON.parse(responseBody);",
+									"",
+									"// searching response array for request_result key-pair value... storing the value",
+									"let req_result;",
+									"",
+									"for (const attribute of responseJson) {",
+									"    if (attribute.resultName === 'REQUEST_RESULT') {",
+									"        req_result = attribute.resultValue;",
+									"        break;",
+									"    }",
+									"}",
+									"",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successfully logged\", () => {",
+									"    pm.expect(req_result).to.eql(\"Logged\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "03208ca9-f935-4e17-b90b-3644de6bf128",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"securityKey\": \"{{sessionKey}}\",\n   \"functionSelector\": \"CON2PP\",\n   \"inParameterList\": [\n      {\n         \"attributeName\": \"NEW_OFFER_ID\",\n         \"attributeValue\": \"NOF1\"\n      },\n      {\n         \"attributeName\": \"ICCID\",\n         \"attributeValue\": \"89440000000002852806\"\n      },\n      {\n         \"attributeName\": \"T11_MSISDN\",\n         \"attributeValue\": \"0825777755\"\n      },\n      {\n         \"attributeName\": \"HLR_NUM_TYPE\",\n         \"attributeValue\": \"S\"\n      }\n   ],\n   \"serviceActionList\": [\n      {\n         \"actionType\": \"CRE\",\n         \"currentSoId\": \"\",\n         \"newSoId\": \"NOF1\",\n         \"sid1\": \"270825700077755\",\n         \"sid1Type\": \"M\",\n         \"sid2\": \"\",\n         \"sid2Type\": \"\",\n         \"sid3\": \"\",\n         \"sid3Type\": \"\",\n         \"sid4\": \"\",\n         \"sid4Type\": \"\"\n      }\n   ],\n   \"partyDetails\": {\n      \"activeYN\": \"\",\n      \"birthDate\": \"\",\n      \"contactList\": [\n         {\n            \"_region\": \"\",\n            \"address1\": \"\",\n            \"address2\": \"\",\n            \"address3\": \"\",\n            \"addressInd\": \"\",\n            \"countryId\": \"\",\n            \"externalPostalCode\": \"\",\n            \"fromDate\": \"\",\n            \"postalCode\": \"\",\n            \"seq\": 0,\n            \"suburb\": \"\",\n            \"toDate\": \"\",\n            \"town\": \"\"\n         }\n      ],\n      \"contactNumList\": [\n         {\n            \"areaNetCode\": \"\",\n            \"contactType\": \"\",\n            \"countryCode\": \"\",\n            \"dialNum\": \"\",\n            \"fromDate\": \"\",\n            \"seq\": 0,\n            \"toDate\": \"\"\n         }\n      ],\n      \"firstName\": \"\",\n      \"gender\": \"\",\n      \"icapId\": 0,\n      \"icapRole\": \"\",\n      \"idList\": [\n         {\n            \"countryId\": \"\",\n            \"fromDate\": \"\",\n            \"id\": \"\",\n            \"idType\": \"\",\n            \"seq\": 0,\n            \"toDate\": \"\"\n         }\n      ],\n      \"initials\": \"\",\n      \"langCode\": \"\",\n      \"listedY\": \"\",\n      \"roleList\": [\n         {\n            \"fromDate\": \"\",\n            \"roleType\": \"\",\n            \"seq\": 0,\n            \"suSeq\": \"\",\n            \"toDate\": \"\"\n         }\n      ],\n      \"seq\": 1,\n      \"surname\": \"\",\n      \"titleId\": \"\"\n   }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/spinterface/dofunction",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"spinterface",
+								"dofunction"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "3235a925-da60-4478-b51b-87c29a276e98"
+		},
+		{
+			"name": "SPAPI - Query Subscriber Info",
+			"item": [
+				{
+					"name": "SPAPI - Query Subscriber Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "35a744a3-bcfe-4ba3-987c-975c3c730002",
+								"exec": [
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "cc1b26af-61a1-4c3c-b82a-138ea949658a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"securityKey\": \"{{sessionKey}}\",\n   \"functionSelector\": \"QRYSPD\",\n   \"inParameterList\": [\n      {\n         \"attributeName\": \"SUBSCRIBER_ID\",\n         \"attributeValue\": \"0825777755\"\n      },\n      {\n         \"attributeName\": \"SUBSCRIBER_ID_TYPE\",\n         \"attributeValue\": \"M\"\n      },\n      {\n         \"attributeName\": \"SUBSCRIBER_ROLE_TYPE\",\n         \"attributeValue\": \"S\"\n      }\n   ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/spinterface/queryfunction",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"spinterface",
+								"queryfunction"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "238e62d7-605f-4d07-9e3d-6167d828521f"
+		},
+		{
+			"name": "SPAPI - Query Subscriber Profile",
+			"item": [
+				{
+					"name": "SPAPI - Query Subscriber Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "852d5bed-083c-4523-980b-86b12976c777",
+								"exec": [
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "eb9e3c6c-4c2a-4d21-b9bc-6284f74baef9",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"securityKey\": \"{{sessionKey}}\",\n   \"functionSelector\": \"QRYPRF\",\n   \"inParameterList\": [\n      {\n         \"attributeName\": \"SUBSCRIBER_ID\",\n         \"attributeValue\": \"0825777755\"\n      },\n      {\n         \"attributeName\": \"SUBSCRIBER_ID_TYPE\",\n         \"attributeValue\": \"M\"\n      }\n   ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/spinterface/performfunction",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"spinterface",
+								"performfunction"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "e663c3cf-8637-4069-ac96-532e93fd9ce9"
+		},
+		{
+			"name": "LOGON",
+			"item": [
+				{
+					"name": "LOGON",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "46b732cd-892f-434a-aa6f-7ed3620dbc2c",
+								"exec": [
+									"var responseJson = xml2Json(responseBody);\r",
+									"console.log(responseJson);\r",
+									"const elementValue = responseJson['soap:Envelope']['soap:Body']['PerformLogon']['key'];\r",
+									"pm.environment.set('key', elementValue);\r",
+									"\r",
+									"var responseJson = xml2Json(pm.response.text());\r",
+									"\r",
+									"// ----- PASS/FAIL TESTS -----\r",
+									"\r",
+									"// check for status code 200\r",
+									"pm.test(\"Status code 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"// check if user successfully logged in to the SP Interface\r",
+									"pm.test(\"Successfull logon\", () => {\r",
+									"    pm.expect(elementValue).to.not.be.empty;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "77b7dd91-370d-4def-be7c-0066a6afe3d7",
+								"exec": [
+									"console.log(\"add service - PORTAL\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "e689b51d-fde7-4040-baaf-ccb3ac4f42de",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<s12:Envelope xmlns:s12='http://www.w3.org/2003/05/soap-envelope'>\r\n  <s12:Body>\r\n    <ns1:loginRequest xmlns:ns1='http://www.altechisis.com/iCAP/Types'>\r\n<!-- optional -->\r\n      <ns1:originId>TC</ns1:originId>\r\n<!-- optional -->\r\n      <ns1:username>{{username}}</ns1:username>\r\n<!-- optional -->\r\n      <ns1:password>{{password}}</ns1:password>\r\n    </ns1:loginRequest>\r\n  </s12:Body>\r\n</s12:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "60977ffd-386c-45c0-b56e-cc51e90390fc"
+		},
+		{
+			"name": "PORTAL - Create Subscriber",
+			"item": [
+				{
+					"name": "PORTAL - Create Subscriber",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "15423636-c612-4255-bac5-c5ef28508ea4",
+								"exec": [
+									"var responseJson = xml2Json(pm.response.text());",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const status = responseJson['soap:Envelope']['soap:Body']['ProcessServiceRequest']['status'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"CRESUB Success\", () => {",
+									"    pm.expect(status).to.eql(\"Success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "913ec4b7-aa6a-4e1e-bc15-71c3cd38244d",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.altechisis.com/iCAP/Types\">\n\t<soapenv:header></soapenv:header>\n\t<soapenv:Body>\n\t\t<typ:serviceRequest>\n\t\t\t<typ:key>\n\t\t\t\t<typ:originId>TC</typ:originId>\n\t\t\t\t<typ:username>{{username}}</typ:username>\n\t\t\t\t<typ:key>{{key}}</typ:key>\n\t\t\t</typ:key>\n\t\t\t<typ:functionSelector>CRESUB</typ:functionSelector>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>89440000000003041136</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID_TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>C</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>ACCOUNT_NO</typ:attributeName>\n\t\t\t\t<typ:attributeValue>11398</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SP_CODE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>SP550</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>CUST_INFO_YN</typ:attributeName>\n\t\t\t\t<typ:attributeValue>N</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>CUSTOMER_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>REASON</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SP_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>IMEI</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>COMPANY_NAME</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>LAST4_ICCID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>AGENT_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>DEALER_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>COMPANY_REGISTRATION_NAME</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>PAYMENT_METHOD</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>OFFER_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>BUNDLE_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t</typ:serviceRequest>\n\t</soapenv:Body>\n</soapenv:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "3c5b33f9-b1a7-42e7-bf55-f5005e31542a"
+		},
+		{
+			"name": "PORTAL - Create Subscriber - Legal Requirement",
+			"item": [
+				{
+					"name": "PORTAL - Create Subscriber - Legal Requirement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b8616bab-e0ec-4f09-8fd7-9fb377b96887",
+								"exec": [
+									"var responseJson = xml2Json(pm.response.text());",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const status = responseJson['soap:Envelope']['soap:Body']['ProcessServiceRequest']['status'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"CRERGL Success\", () => {",
+									"    pm.expect(status).to.eql(\"Success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "60d2da5d-b0f9-4033-a501-3719ae4ac3c3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.altechisis.com/iCAP/Types\">\n\t<soapenv:Body>\n\t\t<typ:serviceRequest>\n\t\t\t<typ:key>\n\t\t\t\t<typ:originId>TC</typ:originId>\n\t\t\t\t<typ:username>{{username}}</typ:username>\n\t\t\t\t<typ:key>{{key}}</typ:key>\n\t\t\t</typ:key>\n\t\t\t<typ:functionSelector>CRERGL</typ:functionSelector>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>89440000000003041136</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID_TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>C</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>LAST4_ICCID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>1136</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>AGENT_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>ICAP\\VSP007KILL</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>REASON</typ:attributeName>\n\t\t\t\t<typ:attributeValue>OTH</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>DEALER_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SENDING_MSISDN</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>PASSPORT_EXPIRY_DATE</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SEOID</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>ALT_CONTACT_NUMBER</typ:attributeName>\n\t\t\t\t<typ:attributeValue>0214171800</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SA_ID_VALIDATION</typ:attributeName>\n\t\t\t\t<typ:attributeValue>N</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:partyDetails>\n\t\t\t\t<typ:seq>0</typ:seq>\n\t\t\t\t<typ:activeYN>Y</typ:activeYN>\n\t\t\t\t<typ:birthDate>1972-10-17</typ:birthDate>\n\t\t\t\t<typ:firstName>Auto</typ:firstName>\n\t\t\t\t<typ:gender>M</typ:gender>\n\t\t\t\t<typ:initials>A</typ:initials>\n\t\t\t\t<typ:langCode>ENG</typ:langCode>\n\t\t\t\t<typ:listedYN>Y</typ:listedYN>\n\t\t\t\t<typ:surname>Testing</typ:surname>\n\t\t\t\t<typ:titleId>Mr</typ:titleId>\n\t\t\t\t<typ:contactList>\n\t\t\t\t\t<typ:PartyContact>\n\t\t\t\t\t\t<typ:seq>0</typ:seq>\n\t\t\t\t\t\t<typ:addressInd>S</typ:addressInd>\n\t\t\t\t\t\t<typ:fromDate>2005-07-08</typ:fromDate>\n\t\t\t\t\t\t<typ:address1>Street1</typ:address1>\n\t\t\t\t\t\t<typ:address2>Street2</typ:address2>\n\t\t\t\t\t\t<typ:address3>Street3</typ:address3>\n\t\t\t\t\t\t<typ:suburb>Foreshore</typ:suburb>\n\t\t\t\t\t\t<typ:town>Cape Town</typ:town>\n\t\t\t\t\t\t<typ:postalCode>8000</typ:postalCode>\n\t\t\t\t\t\t<typ:countryId>ZA</typ:countryId>\n\t\t\t\t\t\t<typ:_region>Western Cape</typ:_region>\n\t\t\t\t\t</typ:PartyContact>\n\t\t\t\t</typ:contactList>\n\t\t\t\t<typ:contactNumList>\n\t\t\t\t\t<typ:PartyContactNum>\n\t\t\t\t\t\t<typ:seq>0</typ:seq>\n\t\t\t\t\t\t<typ:countryCode>27</typ:countryCode>\n\t\t\t\t\t\t<typ:areaNetCode>21</typ:areaNetCode>\n\t\t\t\t\t\t<typ:dialNum>4171800</typ:dialNum>\n\t\t\t\t\t\t<typ:type>H</typ:type>\n\t\t\t\t\t</typ:PartyContactNum>\n\t\t\t\t</typ:contactNumList>\n\t\t\t\t<typ:idList>\n\t\t\t\t\t<typ:PartyId>\n\t\t\t\t\t\t<typ:countryId>ZA</typ:countryId>\n\t\t\t\t\t\t<typ:id>7210175084084</typ:id>\n\t\t\t\t\t\t<typ:idType>N</typ:idType>\n\t\t\t\t\t</typ:PartyId>\n\t\t\t\t</typ:idList>\n\t\t\t\t<typ:roleList>\n\t\t\t\t\t<typ:PartyRole>\n\t\t\t\t\t\t<typ:roleType>L</typ:roleType>\n\t\t\t\t\t</typ:PartyRole>\n\t\t\t\t</typ:roleList>\n\t\t\t</typ:partyDetails>\n\t\t</typ:serviceRequest>\n\t</soapenv:Body>\n</soapenv:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "751a23d6-cd77-4bfb-aadb-919a4b8e6c49"
+		},
+		{
+			"name": "PORTAL - Activate Offer",
+			"item": [
+				{
+					"name": "PORTAL - Activate Offer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9221ac3f-b591-4f76-9b94-675cdaae428f",
+								"exec": [
+									"var responseJson = xml2Json(pm.response.text());",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const status = responseJson['soap:Envelope']['soap:Body']['ProcessServiceRequest']['status'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"ACTOFF Success\", () => {",
+									"    pm.expect(status).to.eql(\"Success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "73b7899c-f4e9-4b41-87a4-b378ac00a0d2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.altechisis.com/iCAP/Types\">\n\t<soapenv:Body>\n\t\t<typ:serviceRequest>\n\t\t\t<typ:key>\n\t\t\t\t<typ:originId>TC</typ:originId>\n\t\t\t\t<typ:username>{{username}}</typ:username>\n\t\t\t\t<typ:key>{{key}}</typ:key>\n\t\t\t</typ:key>\n\t\t\t<typ:functionSelector>ACTOFF</typ:functionSelector>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>89440000000003041136</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID_TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>ICCID</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>OFFER_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>BUS</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>CLASS</typ:attributeName>\n\t\t\t\t<typ:attributeValue>NAT</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>ICCID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>89440000000003041136</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>REASON</typ:attributeName>\n\t\t\t\t<typ:attributeValue>ACT</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>HLR_NUM_TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>S</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:serviceActionList>\n\t\t\t\t<typ:newSoId>BUS</typ:newSoId>\n\t\t\t\t<typ:actionType>CRE</typ:actionType>\n\t\t\t\t<typ:sid1>270824400013080</typ:sid1>\n\t\t\t\t<typ:sid1Type>M</typ:sid1Type>\n\t\t\t</typ:serviceActionList>\n\t\t</typ:serviceRequest>\n\t</soapenv:Body>\n</soapenv:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "09dbe0ca-58c4-41c2-bc03-543a7c6af7cf"
+		},
+		{
+			"name": "PORTAL - Manage Offer",
+			"item": [
+				{
+					"name": "PORTAL - Manage Offer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8cab9f49-7e1a-4cdb-8c02-190458ce374f",
+								"exec": [
+									"var responseJson = xml2Json(pm.response.text());",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const status = responseJson['soap:Envelope']['soap:Body']['ProcessServiceRequest']['status'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"MNGOFF Success\", () => {",
+									"    pm.expect(status).to.eql(\"Success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "2a759212-fc4a-48d8-ac4d-86e6801875ae",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.altechisis.com/iCAP/Types\">\n\t<soapenv:Body>\n\t\t<typ:serviceRequest>\n\t\t\t<typ:key>\n\t\t\t\t<typ:originId>TC</typ:originId>\n\t\t\t\t<typ:username>{{username}}</typ:username>\n\t\t\t\t<typ:key>{{key}}</typ:key>\n\t\t\t</typ:key>\n\t\t\t<typ:functionSelector>MNGOFF</typ:functionSelector>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>0824413080</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID_TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>M</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>OFFER_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>NOF1</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>REASON</typ:attributeName>\n\t\t\t\t<typ:attributeValue>DRC</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:serviceActionList>\n\t\t\t\t<typ:currentSoId>DRC2</typ:currentSoId>\n\t\t\t\t<typ:actionType>CRE</typ:actionType>\n\t\t\t\t<typ:sid1>270824400013080</typ:sid1>\n\t\t\t\t<typ:sid1Type>M</typ:sid1Type>\n\t\t\t</typ:serviceActionList>\n\t\t</typ:serviceRequest>\n\t</soapenv:Body>\n</soapenv:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "cc63a66b-c636-4367-a8ea-cacdbdea3d42"
+		},
+		{
+			"name": "DB - SQL Check Services",
+			"item": [
+				{
+					"name": "DB - SQL Check Services",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a9badce7-e515-44f8-9f22-11ef1210040a",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody);",
+									"var services = responseJson['Result'];",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"let service_status = false;",
+									"for (let id of services){",
+									"    if (id['SO_ID'] === 'DRC2'){",
+									"        service_status = true;",
+									"        break;",
+									"    }",
+									"}",
+									"",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successfully deleted subscriber\", () => {",
+									"    pm.expect(service_status).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "54b4c32d-a425-42f8-9ac9-04de21952953",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"SqlStatement\": \"SELECT SO_ID FROM SA_VW_CURR_SERVICES WHERE SU_SEQ = (SELECT SU_SEQ FROM SA_SERVICES WHERE SEQ = (SELECT MAX(SV_SEQ) FROM SA_SERVICE_IDS WHERE ID = '270824400013080' AND ID_TYPE = 'M' AND (DATE_TO IS NULL OR DATE_TO >= SYSDATE - 1/96))) AND (SV_END_DATE > SYSDATE OR SV_END_DATE IS NULL)\",\n   \"Operation\": \"QUERY\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/db/executeoperation",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"db",
+								"executeoperation"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "773eece5-82f3-44a3-bcbc-5ce6ec7b6c0d"
+		},
+		{
+			"name": "PORTAL - Manage Offer",
+			"item": [
+				{
+					"name": "PORTAL - Manage Offer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "59b009ff-e2ab-4edd-b62a-aae74e06ea74",
+								"exec": [
+									"var responseJson = xml2Json(pm.response.text());",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const status = responseJson['soap:Envelope']['soap:Body']['ProcessServiceRequest']['status'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"MNGOFF Success\", () => {",
+									"    pm.expect(status).to.eql(\"Success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "1e7c4640-e446-4f1f-957b-33dd79019ff6",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.altechisis.com/iCAP/Types\">\n\t<soapenv:Body>\n\t\t<typ:serviceRequest>\n\t\t\t<typ:key>\n\t\t\t\t<typ:originId>TC</typ:originId>\n\t\t\t\t<typ:username>{{username}}</typ:username>\n\t\t\t\t<typ:key>{{key}}</typ:key>\n\t\t\t</typ:key>\n\t\t\t<typ:functionSelector>MNGOFF</typ:functionSelector>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>0824413080</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID_TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>M</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>OFFER_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>NOF1</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>REASON</typ:attributeName>\n\t\t\t\t<typ:attributeValue>DRC</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:serviceActionList>\n\t\t\t\t<typ:currentSoId>DRC2</typ:currentSoId>\n\t\t\t\t<typ:actionType>DEL</typ:actionType>\n\t\t\t\t<typ:sid1>270824400013080</typ:sid1>\n\t\t\t\t<typ:sid1Type>M</typ:sid1Type>\n\t\t\t</typ:serviceActionList>\n\t\t</typ:serviceRequest>\n\t</soapenv:Body>\n</soapenv:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "a7deffbd-a393-4144-a933-e3a632610875"
+		},
+		{
+			"name": "DB - SQL Check Services",
+			"item": [
+				{
+					"name": "DB - SQL Check Services",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e3a5af01-c05b-4fcc-afe4-393a5584523c",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody);",
+									"var services = responseJson['Result'];",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"let service_status = false;",
+									"for (let id of services){",
+									"    if (id['SO_ID'] === 'DRC2'){",
+									"        service_status = true;",
+									"        break;",
+									"    }",
+									"}",
+									"",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successfully deleted subscriber\", () => {",
+									"    pm.expect(service_status).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "33f070ed-e04f-4136-ac33-a7e6c16037ca",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"SqlStatement\": \"SELECT SO_ID FROM SA_VW_CURR_SERVICES WHERE SU_SEQ = (SELECT SU_SEQ FROM SA_SERVICES WHERE SEQ = (SELECT MAX(SV_SEQ) FROM SA_SERVICE_IDS WHERE ID = '270824400013080' AND ID_TYPE = 'M' AND (DATE_TO IS NULL OR DATE_TO >= SYSDATE - 1/96))) AND (SV_END_DATE > SYSDATE OR SV_END_DATE IS NULL)\",\n   \"Operation\": \"QUERY\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/db/executeoperation",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"db",
+								"executeoperation"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "e13545a2-25fc-4f89-9ccc-eaf97b561697"
+		},
+		{
+			"name": "PORTAL - Manage Offer",
+			"item": [
+				{
+					"name": "PORTAL - Manage Offer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "312dd874-cf26-4592-bf4d-c9ac9ffbe419",
+								"exec": [
+									"var responseJson = xml2Json(pm.response.text());",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const status = responseJson['soap:Envelope']['soap:Body']['ProcessServiceRequest']['status'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"MNGOFF Success\", () => {",
+									"    pm.expect(status).to.eql(\"Success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "66ac30cc-e406-4488-81bb-b980ddcb7a91",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.altechisis.com/iCAP/Types\">\n\t<soapenv:Body>\n\t\t<typ:serviceRequest>\n\t\t\t<typ:key>\n\t\t\t\t<typ:originId>TC</typ:originId>\n\t\t\t\t<typ:username>{{username}}</typ:username>\n\t\t\t\t<typ:key>{{key}}</typ:key>\n\t\t\t</typ:key>\n\t\t\t<typ:functionSelector>MNGOFF</typ:functionSelector>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>0824413080</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID_TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>M</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>OFFER_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>NOF1</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>REASON</typ:attributeName>\n\t\t\t\t<typ:attributeValue>DRC</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:serviceActionList>\n\t\t\t\t<typ:currentSoId>DRC1</typ:currentSoId>\n\t\t\t\t<typ:actionType>CRE</typ:actionType>\n\t\t\t\t<typ:sid1>270824400013080</typ:sid1>\n\t\t\t\t<typ:sid1Type>M</typ:sid1Type>\n\t\t\t</typ:serviceActionList>\n\t\t</typ:serviceRequest>\n\t</soapenv:Body>\n</soapenv:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "06533cb2-c9ac-4016-81aa-6943e2ff47d7"
+		},
+		{
+			"name": "DB - SQL Check Services",
+			"item": [
+				{
+					"name": "DB - SQL Check Services",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b59afb4b-df55-4c53-9bba-c31064e748ed",
+								"exec": [
+									"var responseJson = JSON.parse(responseBody);",
+									"var services = responseJson['Result'];",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"let service_status = false;",
+									"for (let id of services){",
+									"    if (id['SO_ID'] === 'DRC1'){",
+									"        service_status = true;",
+									"        break;",
+									"    }",
+									"}",
+									"",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successfully deleted subscriber\", () => {",
+									"    pm.expect(service_status).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "ecef21fc-783d-454f-959a-dad4709d38ea",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"SqlStatement\": \"SELECT SO_ID FROM SA_VW_CURR_SERVICES WHERE SU_SEQ = (SELECT SU_SEQ FROM SA_SERVICES WHERE SEQ = (SELECT MAX(SV_SEQ) FROM SA_SERVICE_IDS WHERE ID = '270824400013080' AND ID_TYPE = 'M' AND (DATE_TO IS NULL OR DATE_TO >= SYSDATE - 1/96))) AND (SV_END_DATE > SYSDATE OR SV_END_DATE IS NULL)\",\n   \"Operation\": \"QUERY\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Wrapper}}49605/resttocorba/db/executeoperation",
+							"host": [
+								"{{Base_URL_Wrapper}}49605"
+							],
+							"path": [
+								"resttocorba",
+								"db",
+								"executeoperation"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "5ea7153a-aaa6-42f6-8d79-541591d2fb30"
+		},
+		{
+			"name": "PORTAL - Delete Subscriber",
+			"item": [
+				{
+					"name": "PORTAL - Delete Subscriber",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7c4df689-610e-4ebd-9742-9f37098eec58",
+								"exec": [
+									"var responseJson = xml2Json(pm.response.text());",
+									"",
+									"// ----- PASS/FAIL TESTS -----",
+									"",
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// retrieving the logon status from the response",
+									"const status = responseJson['soap:Envelope']['soap:Body']['ProcessServiceRequest']['status'];",
+									"",
+									"// check if user successfully logged in to the SP Interface",
+									"pm.test(\"Successfully deleted subscriber\", () => {",
+									"    pm.expect(status).to.eql(\"Success\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "9a3f4b3c-45eb-4fe3-922f-0bdc7e32be19",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:typ=\"http://www.altechisis.com/iCAP/Types\">\n\t<soapenv:header></soapenv:header>\n\t<soapenv:Body>\n\t\t<typ:serviceRequest>\n\t\t\t<typ:key>\n\t\t\t\t<typ:originId>TC</typ:originId>\n\t\t\t\t<typ:username>{{username}}</typ:username>\n\t\t\t\t<typ:key>{{key}}</typ:key>\n\t\t\t</typ:key>\n\t\t\t<typ:functionSelector>REMSUB</typ:functionSelector>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID</typ:attributeName>\n\t\t\t\t<typ:attributeValue>0824413080</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>SUB_ID_TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue>M</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>TYPE</typ:attributeName>\n\t\t\t\t<typ:attributeValue></typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t\t<typ:attributes>\n\t\t\t\t<typ:attributeName>REASON</typ:attributeName>\n\t\t\t\t<typ:attributeValue>MDD</typ:attributeValue>\n\t\t\t</typ:attributes>\n\t\t</typ:serviceRequest>\n\t</soapenv:Body>\n</soapenv:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "8d88f18a-c283-4832-bd7c-b4dff8802852"
+		},
+		{
+			"name": "LOGOUT",
+			"item": [
+				{
+					"name": "LOGOUT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2d2ef145-8db0-45df-afbc-ba2f7864bf12",
+								"exec": [
+									"// check for status code 200",
+									"pm.test(\"Status code 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"id": "cf544b85-d10f-41ae-a37e-79b282ce948c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/xml",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<s12:Envelope xmlns:s12='http://www.w3.org/2003/05/soap-envelope' xmlns:ns1='http://www.altechisis.com/iCAP/Types'>\r\n<s12:Body>\r\n<ns1:key>\r\n<!-- optional -->\r\n<ns1:originId>TC</ns1:originId>\r\n<!-- optional -->\r\n<ns1:username>{{username}}</ns1:username>\r\n<!-- optional -->\r\n<ns1:key>{{key}}</ns1:key>\r\n</ns1:key>\r\n</s12:Body>\r\n</s12:Envelope>",
+							"options": {
+								"raw": {
+									"language": "xml"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{Base_URL_Portal}}19306/Portal2/PortalService.asmx/",
+							"host": [
+								"{{Base_URL_Portal}}19306"
+							],
+							"path": [
+								"Portal2",
+								"PortalService.asmx",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "de94dada-4988-407c-a9b5-5ca37c494d85"
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "p@ssw0rd",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "user",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				],
+				"id": "ac99ac2d-177f-4b3c-a594-a8fd5c7ad29c"
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				],
+				"id": "eefadb9b-8102-44de-adce-8915be33b361"
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "25d1be31-b0eb-4736-99be-7962f6336d90",
+			"key": "QA",
+			"value": "http://betcap09:19306/Portal2/PortalService.asmx/",
+			"type": "default"
+		}
+	]
+}
